@@ -30,6 +30,9 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
   const audioContext = useRef<AudioContext | null>(null)
   const [isMobile, setIsMobile] = useState(false)
   const [shootEffect, setShootEffect] = useState<{x: number, y: number} | null>(null)
+  
+  // Ref to keep track of score for callbacks
+  const scoreRef = useRef(score)
 
   // Initialize high score from localStorage and check if mobile
   useEffect(() => {
@@ -51,8 +54,12 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
     }
   }, [])
 
-  // Report score to parent component
+  // Update the ref whenever score changes and report to parent component
   useEffect(() => {
+    // Update the ref
+    scoreRef.current = score;
+    
+    // Report to parent component
     if (onScoreUpdate) {
       onScoreUpdate(score);
     }
@@ -104,10 +111,18 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
     if (gameLoopRef.current) clearInterval(gameLoopRef.current)
     if (duckSpawnRef.current) clearInterval(duckSpawnRef.current)
 
+    // Make sure to use the current score from the ref
+    const finalScore = scoreRef.current;
+    
     // Update high score
-    if (score > highScore) {
-      setHighScore(score)
-      localStorage.setItem("duckGameHighScore", score.toString())
+    if (finalScore > highScore) {
+      setHighScore(finalScore)
+      localStorage.setItem("duckGameHighScore", finalScore.toString())
+    }
+    
+    // Final score update to parent
+    if (onScoreUpdate) {
+      onScoreUpdate(finalScore);
     }
   }
 

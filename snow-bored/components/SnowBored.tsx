@@ -71,6 +71,30 @@ export default function SnowBored() {
   };
 
   useEffect(() => {
+    // Reset game state when game over state changes, especially when starting a new game
+    if (!gameOver) {
+      gameStateRef.current = {
+        player: {
+          x: 100,
+          y: GAME_CONSTANTS.CANVAS_HEIGHT / 2,
+          velocityY: 0,
+          isMovingUp: false,
+          sprite: gameStateRef.current.player.sprite // Keep the loaded sprite
+        },
+        obstacles: [],
+        trailPoints: [],
+        frameCount: 0,
+        startTime: Date.now(),
+        gameSpeedMultiplier: 1, // Reset the speed multiplier
+        obstacleGenerationInterval: GAME_CONSTANTS.TREE_GENERATION_INTERVAL,
+        lastSpeedIncreaseTime: 0,
+        score: 0,
+        isGameOver: false
+      };
+    }
+  }, [gameOver]);
+
+  useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
 

@@ -1,0 +1,1 @@
+// This file is no longer needed since the component is defined inside page.tsx

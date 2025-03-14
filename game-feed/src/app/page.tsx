@@ -254,6 +254,7 @@ const GameFeedItem = React.forwardRef<HTMLDivElement, GameFeedItemProps>(({ game
   });
 
   const [score, setScore] = useState(0);
+  const scoreRef = useRef(0); // Add ref to maintain latest score value
   const GameComponent = game.component;
   
   // Import and use the mobile detection hook
@@ -284,12 +285,15 @@ const GameFeedItem = React.forwardRef<HTMLDivElement, GameFeedItemProps>(({ game
     [inViewRef, ref]
   );
 
-  // Update score and notify parent when in view
+  // Update score reference and notify parent when in view
   useEffect(() => {
+    // Update ref whenever score changes
+    scoreRef.current = score;
+    
     if (inView) {
       onInView();
     }
-  }, [inView, onInView]);
+  }, [inView, onInView, score]);
 
   return (
     <motion.div
@@ -374,7 +378,7 @@ const GameFeedItem = React.forwardRef<HTMLDivElement, GameFeedItemProps>(({ game
             <div className="flex flex-col gap-4 items-center">
               <motion.button 
                 whileTap={{ scale: 0.95 }}
-                onClick={() => onShare(score)}
+                onClick={() => onShare(scoreRef.current)} 
                 className="bg-black p-3 rounded-full shadow-lg"
                 aria-label="Share to X (Twitter)"
               >
