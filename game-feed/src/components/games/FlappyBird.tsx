@@ -161,6 +161,32 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
+    
+    // Make sure canvas is properly sized for the container
+    const resizeCanvas = () => {
+      const container = canvas.parentElement;
+      if (container) {
+        // Maintain aspect ratio while filling the container
+        const containerRatio = container.clientWidth / container.clientHeight;
+        const canvasRatio = 288 / 512;
+        
+        if (containerRatio > canvasRatio) {
+          // Container is wider than canvas aspect ratio
+          canvas.style.width = 'auto';
+          canvas.style.height = '100%';
+        } else {
+          // Container is taller than canvas aspect ratio
+          canvas.style.width = '100%';
+          canvas.style.height = 'auto';
+        }
+      }
+    };
+    
+    // Call resize on initial load
+    resizeCanvas();
+    
+    // Add resize listener
+    window.addEventListener('resize', resizeCanvas);
 
     const gameLoop = setInterval(() => {
       // Clear canvas
@@ -301,7 +327,10 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
       }
     }, 1000 / 60) // 60 FPS
 
-    return () => clearInterval(gameLoop)
+    return () => {
+      clearInterval(gameLoop);
+      window.removeEventListener('resize', resizeCanvas);
+    }
   }, [bird, pipes, gameOver, score, jump, gameStarted, assetsLoaded, restartGame, playSound, onScoreUpdate])
 
   const handleCanvasClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
@@ -339,15 +368,23 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-black">
-      <canvas
-        ref={canvasRef}
-        width={288}
-        height={512}
-        className="h-full w-full object-contain"
-        onClick={handleCanvasClick}
-        onTouchStart={handleCanvasTouch}
-        style={{ touchAction: 'none' }}
-      />
+      <div className="h-full w-full flex items-center justify-center">
+        <canvas
+          ref={canvasRef}
+          width={288}
+          height={512}
+          onClick={handleCanvasClick}
+          onTouchStart={handleCanvasTouch}
+          style={{ 
+            touchAction: 'none',
+            display: 'block',
+            maxWidth: '100%',
+            maxHeight: '100%',
+            width: 'auto',
+            height: '100%'
+          }}
+        />
+      </div>
     </div>
   )
 }
