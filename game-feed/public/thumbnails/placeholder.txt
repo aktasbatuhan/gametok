@@ -1,0 +1,1 @@
+Placeholder for game thumbnails. In a production environment, we would add actual thumbnail images of each game here.
