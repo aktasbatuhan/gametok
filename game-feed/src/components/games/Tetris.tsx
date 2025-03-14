@@ -358,29 +358,33 @@ export default function Tetris({ onScoreUpdate }: TetrisProps) {
       )}
       
       {/* Mobile controls */}
-      <div className="grid grid-cols-3 gap-2 w-full mt-2">
+      <div className="grid grid-cols-3 gap-2 w-full mt-2 z-30 relative mb-8">
         <button 
-          className="bg-gray-700 rounded-full p-2 text-white text-sm"
+          className="bg-gray-700 rounded-full p-3 text-white text-lg font-bold"
           onTouchStart={() => handleTouchStart('left')}
+          onClick={() => handleTouchStart('left')}
         >
           ←
         </button>
         <button 
-          className="bg-gray-700 rounded-full p-2 text-white text-sm"
+          className="bg-gray-700 rounded-full p-3 text-white text-lg font-bold"
           onTouchStart={() => handleTouchStart('rotate')}
+          onClick={() => handleTouchStart('rotate')}
         >
           Rotate
         </button>
         <button 
-          className="bg-gray-700 rounded-full p-2 text-white text-sm"
+          className="bg-gray-700 rounded-full p-3 text-white text-lg font-bold"
           onTouchStart={() => handleTouchStart('right')}
+          onClick={() => handleTouchStart('right')}
         >
           →
         </button>
         <div className="col-span-3">
           <button 
-            className="bg-gray-700 rounded-full p-2 text-white text-sm w-full"
+            className="bg-gray-700 rounded-full p-3 text-white text-lg font-bold w-full"
             onTouchStart={() => handleTouchStart('down')}
+            onClick={() => handleTouchStart('down')}
           >
             ↓
           </button>

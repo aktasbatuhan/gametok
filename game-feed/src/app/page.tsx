@@ -226,6 +226,9 @@ interface GameFeedItemProps {
     component: React.ComponentType<any>;
     thumbnail: string | null;
     creatorUrl?: string;
+    author?: string;
+    authorUrl?: string;
+    sourceUrl?: string;
   };
   onShare: (score: number) => void;
   onInView: () => void;
@@ -240,6 +243,19 @@ const GameFeedItem = React.forwardRef<HTMLDivElement, GameFeedItemProps>(({ game
 
   const [score, setScore] = useState(0);
   const GameComponent = game.component;
+  
+  // Import and use the mobile detection hook
+  const isMobile = typeof window !== 'undefined' ? window.innerWidth < 768 : false;
+  const [mobileMode, setMobileMode] = useState(isMobile);
+  
+  useEffect(() => {
+    const handleResize = () => {
+      setMobileMode(window.innerWidth < 768);
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Combine the refs
   const setRefs = useCallback(
@@ -274,15 +290,19 @@ const GameFeedItem = React.forwardRef<HTMLDivElement, GameFeedItemProps>(({ game
       transition={{ duration: 0.4 }}
       className="min-h-screen flex flex-col items-center justify-center relative"
     >
-      {/* Game container with phone-like frame */}
-      <div className="max-w-md w-full aspect-[9/16] bg-black rounded-3xl overflow-hidden border-4 border-gray-800 shadow-2xl relative">
+      {/* Game container - different styling for mobile vs desktop */}
+      <div className={`${mobileMode 
+          ? "w-full h-screen bg-black" 
+          : "max-w-md w-full aspect-[9/16] bg-black rounded-3xl overflow-hidden border-4 border-gray-800 shadow-2xl"
+        } relative`}
+      >
         {/* Game content */}
         <div className="h-full w-full">
           {inView && <GameComponent onScoreUpdate={setScore} />}
         </div>
         
         {/* Game info overlay */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent">
+        <div className={`absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 via-black/40 to-transparent ${mobileMode ? 'z-20' : ''}`}>
           <div className="flex justify-between items-end">
             <div className="text-white">
               <h2 className="text-xl font-bold">{game.title}</h2>
@@ -359,8 +379,10 @@ const GameFeedItem = React.forwardRef<HTMLDivElement, GameFeedItemProps>(({ game
           </div>
         </div>
         
-        {/* Notch at top of "phone" */}
-        <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-black rounded-b-2xl z-10"></div>
+        {/* Notch at top of "phone" - only show on desktop */}
+        {!mobileMode && (
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-1/3 h-6 bg-black rounded-b-2xl z-10"></div>
+        )}
       </div>
       
       {/* Game loading indicator */}

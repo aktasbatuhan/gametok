@@ -333,8 +333,10 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
         ref={canvasRef}
         width={288}
         height={512}
-        className="h-full w-full object-contain touch-none"
+        className="h-full w-full object-contain"
         onClick={handleCanvasClick}
+        onTouchStart={handleCanvasClick}
+        style={{ touchAction: 'none' }}
       />
     </div>
   )
