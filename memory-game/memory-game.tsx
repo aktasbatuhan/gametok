@@ -157,4 +157,11 @@ export default function MemoryGame() {
         onClick={resetGame} 
         variant="outline" 
         size="lg"
-        className="bg-indigo-950 border-indigo-700 ho
+        className="bg-indigo-950 border-indigo-700 hover:bg-indigo-900 hover:border-indigo-500 text-indigo-200 hover:text-indigo-100"
+      >
+        Start New Game
+      </Button>
+    </div>
+  )
+}
+

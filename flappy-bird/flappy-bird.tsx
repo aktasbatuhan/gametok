@@ -319,4 +319,11 @@ export default function FlappyBird() {
           height={512}
           className="border border-gray-300 w-full h-auto touch-manipulation max-h-[80vh]"
           onClick={handleCanvasClick}
-       
+          style={{ aspectRatio: '288/512' }}
+        />
+      </div>
+      <p className="mt-4 text-sm sm:text-lg text-center">Press Space to start/jump or tap the game area</p>
+    </div>
+  )
+}
+
