@@ -94,7 +94,7 @@ export default function GameSubmissionModal({ onClose }: GameSubmissionModalProp
             </div>
             <h3 className="text-xl font-medium text-white mb-2">Request Submitted!</h3>
             <p className="text-gray-300 mb-6">
-              We've received your game submission request. We'll review it and get back to you soon!
+              I've received your game submission request. I'll review it and get back to you soon!
             </p>
             <button
               onClick={onClose}

@@ -21,7 +21,7 @@ function Square({
 }) {
   return (
     <button
-      className={`h-20 w-20 border-2 border-primary/20 text-4xl font-bold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors
+      className={`h-16 w-16 sm:h-20 sm:w-20 border-2 border-primary/20 text-2xl sm:text-4xl font-bold flex items-center justify-center focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-colors touch-manipulation
         ${isWinningSquare ? "bg-primary/20" : "hover:bg-primary/10"}`}
       onClick={onSquareClick}
       disabled={disabled}
@@ -182,27 +182,28 @@ Choose the best move (return only the position number 0-8).
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center p-4">
-      <Card className="w-full max-w-md p-6 shadow-lg">
-        <h1 className="mb-6 text-center text-3xl font-bold">Tic Tac Toe vs AI</h1>
+    <div className="flex min-h-screen flex-col items-center justify-center p-2 sm:p-4">
+      <Card className="w-full max-w-md p-3 sm:p-6 shadow-lg">
+        <h1 className="mb-3 sm:mb-6 text-center text-xl sm:text-3xl font-bold">Tic Tac Toe vs AI</h1>
 
         <Board xIsNext={xIsNext} squares={currentSquares} onPlay={handlePlay} aiThinking={aiThinking} />
 
-        <div className="mt-6 flex justify-center">
-          <Button onClick={resetGame} variant="outline">
+        <div className="mt-4 sm:mt-6 flex justify-center">
+          <Button onClick={resetGame} variant="outline" className="touch-manipulation">
             Restart Game
           </Button>
         </div>
 
-        <div className="mt-6">
-          <h2 className="mb-2 text-lg font-medium">Game History</h2>
-          <div className="flex flex-wrap gap-2">
+        <div className="mt-4 sm:mt-6">
+          <h2 className="mb-2 text-base sm:text-lg font-medium">Game History</h2>
+          <div className="flex flex-wrap gap-1 sm:gap-2">
             {history.map((_, move) => (
               <Button
                 key={move}
                 variant={move === currentMove ? "default" : "outline"}
                 size="sm"
                 onClick={() => jumpTo(move)}
+                className="text-xs sm:text-sm touch-manipulation"
               >
                 {move === 0 ? "Start" : `Move #${move}`}
               </Button>

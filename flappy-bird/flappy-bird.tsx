@@ -311,15 +311,18 @@ export default function FlappyBird() {
   }, [gameOver, jump, restartGame])
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
-      <canvas
-        ref={canvasRef}
-        width={288}
-        height={512}
-        className="border border-gray-300"
-        onClick={handleCanvasClick}
-      />
-      <p className="mt-4 text-lg">Press Space to start/jump or click/tap the game area</p>
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <div className="relative w-full max-w-md">
+        <canvas
+          ref={canvasRef}
+          width={288}
+          height={512}
+          className="border border-gray-300 w-full h-auto touch-manipulation max-h-[80vh]"
+          onClick={handleCanvasClick}
+          style={{ aspectRatio: '288/512' }}
+        />
+      </div>
+      <p className="mt-4 text-sm sm:text-lg text-center">Press Space to start/jump or tap the game area</p>
     </div>
   )
 }

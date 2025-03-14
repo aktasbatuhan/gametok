@@ -57,6 +57,18 @@ export default function SnowBored() {
       gameStateRef.current.player.isMovingUp = false;
     }
   };
+  
+  const handleTouchStart = () => {
+    if (!gameStateRef.current.isGameOver) {
+      gameStateRef.current.player.isMovingUp = true;
+    }
+  };
+  
+  const handleTouchEnd = () => {
+    if (!gameStateRef.current.isGameOver) {
+      gameStateRef.current.player.isMovingUp = false;
+    }
+  };
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -267,6 +279,10 @@ export default function SnowBored() {
 
       window.addEventListener('keydown', handleKeyDown)
       window.addEventListener('keyup', handleKeyUp)
+      
+      // Add touch events for mobile
+      canvas.addEventListener('touchstart', handleTouchStart)
+      canvas.addEventListener('touchend', handleTouchEnd)
 
       gameLoop()
     }
@@ -276,33 +292,39 @@ export default function SnowBored() {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
       window.removeEventListener('keyup', handleKeyUp)
+      
+      if (canvas) {
+        canvas.removeEventListener('touchstart', handleTouchStart)
+        canvas.removeEventListener('touchend', handleTouchEnd)
+      }
     }
   }, [gameOver, gameTime])
 
   return (
     <div 
-      className="flex flex-col items-center justify-center min-h-screen p-4"
+      className="flex flex-col items-center justify-center min-h-screen p-2 sm:p-4"
       style={{
         backgroundImage: 'url("https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Ice-RFivzrFYklghXcbtYkoYiMiESh5rh5.png")',
         backgroundRepeat: 'repeat'
       }}
     >
-      <h1 className={`text-4xl font-bold mb-4 ${gameOver ? 'text-red-500' : 'text-white'}`} style={{ fontFamily: '"Press Start 2P", cursive' }}>
+      <h1 className={`text-2xl sm:text-4xl font-bold mb-2 sm:mb-4 text-center ${gameOver ? 'text-red-500' : 'text-white'}`} style={{ fontFamily: '"Press Start 2P", cursive' }}>
         {gameOver ? "It's Snow Over" : "We're Snow Back"}
       </h1>
-      <div className="relative">
+      <div className="relative w-full max-w-lg">
         <canvas
           ref={canvasRef}
           width={GAME_CONSTANTS.CANVAS_WIDTH}
           height={GAME_CONSTANTS.CANVAS_HEIGHT}
-          className="border-4 border-gray-700 rounded-lg"
+          className="border-2 sm:border-4 border-gray-700 rounded-lg w-full h-auto touch-manipulation max-h-[80vh]"
+          style={{ aspectRatio: `${GAME_CONSTANTS.CANVAS_WIDTH}/${GAME_CONSTANTS.CANVAS_HEIGHT}` }}
         />
         {gameOver && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/75">
             <div className="text-white text-center">
               <button
                 onClick={() => window.location.reload()}
-                className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 font-pixel"
+                className="px-4 py-2 bg-black text-white rounded hover:bg-gray-800 font-pixel touch-manipulation"
                 style={{ fontFamily: '"Press Start 2P", cursive' }}
               >
                 Play Again
@@ -311,7 +333,7 @@ export default function SnowBored() {
           </div>
         )}
       </div>
-      <p className="text-white mt-4">Press and hold SPACE to move up</p>
+      <p className="text-white mt-2 sm:mt-4 text-center text-sm sm:text-base">Press SPACE or touch and hold screen to move up</p>
     </div>
   )
 }

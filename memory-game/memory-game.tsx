@@ -98,9 +98,9 @@ export default function MemoryGame() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-8 bg-gradient-to-br from-purple-950 via-indigo-950 to-slate-950">
-      <div className="text-center space-y-4">
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 text-transparent bg-clip-text">
+    <div className="flex flex-col items-center justify-center min-h-screen p-4 space-y-4 sm:space-y-8 bg-gradient-to-br from-purple-950 via-indigo-950 to-slate-950">
+      <div className="text-center space-y-2 sm:space-y-4">
+        <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-purple-300 via-pink-300 to-indigo-300 text-transparent bg-clip-text">
           Memory Match Game
         </h1>
         <p className="text-indigo-200">
@@ -108,7 +108,7 @@ export default function MemoryGame() {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 md:gap-6 p-6 rounded-xl bg-indigo-950/50 backdrop-blur-sm">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6 p-3 sm:p-6 rounded-xl bg-indigo-950/50 backdrop-blur-sm max-w-[95vw] sm:max-w-full">
         {cards.map((card, index) => (
           <motion.div
             key={card.id}
@@ -120,7 +120,7 @@ export default function MemoryGame() {
             className="perspective-1000"
           >
             <Card
-              className={`relative w-24 h-24 md:w-32 md:h-32 cursor-pointer transform-style-3d transition-all duration-300 ${
+              className={`relative w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 cursor-pointer transform-style-3d transition-all duration-300 touch-manipulation ${
                 card.isMatched
                   ? "bg-indigo-900/50 border-indigo-400/50"
                   : flippedIndexes.includes(index)
@@ -139,7 +139,7 @@ export default function MemoryGame() {
                     className="absolute inset-0 flex items-center justify-center backface-hidden"
                   >
                     <card.icon
-                      className={`w-12 h-12 ${
+                      className={`w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 ${
                         card.isMatched 
                           ? `${card.color} filter drop-shadow-[0_0_8px_rgba(255,255,255,0.3)]` 
                           : card.color
