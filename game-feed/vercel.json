@@ -1,13 +1,9 @@
 {
+  "framework": "nextjs",
   "buildCommand": "npm run build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "framework": "nextjs",
-  "outputDirectory": ".next",
   "regions": ["sfo1"],
   "cleanUrls": true,
-  "trailingSlash": false,
-  "github": {
-    "silent": true
-  }
+  "trailingSlash": false
 }
