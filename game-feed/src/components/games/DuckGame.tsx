@@ -260,13 +260,13 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
     setTimeout(() => playSound("hit"), 100)
   }
 
-  // Remove hit ducks after animation
+  // Remove hit ducks after animation (increased timeout to match new animation duration)
   useEffect(() => {
     const hitDucks = ducks.filter((duck) => duck.hit)
     if (hitDucks.length > 0) {
       const timer = setTimeout(() => {
         setDucks((prevDucks) => prevDucks.filter((duck) => !duck.hit))
-      }, 500)
+      }, 1500) // Increased to match the new animation duration
       return () => clearTimeout(timer)
     }
   }, [ducks])
@@ -372,7 +372,7 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
     );
   };
 
-  // Duck component
+  // Duck component with improved falling animation
   const Duck = ({ position, direction, hit, onClick }: { 
     position: { x: number, y: number },
     direction: "left" | "right",
@@ -386,17 +386,33 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
           left: position.x,
           top: position.y,
           transform: direction === "left" ? "scaleX(-1)" : "none",
+          transformOrigin: "center",
+          willChange: "transform, opacity"
         }}
+        initial={false}
         animate={
           hit
             ? {
-                y: [0, -20, 200],
+                y: position.y + 300, // Ensure it moves down by a good amount
                 opacity: [1, 1, 0],
-                rotate: [0, 0, 180],
+                rotate: 180,
+                scale: 0.8
               }
-            : {}
+            : {
+                rotate: 0,
+                scale: 1,
+                opacity: 1
+              }
         }
-        transition={{ duration: 0.5 }}
+        transition={hit ? {
+          type: "spring",
+          damping: 5,
+          stiffness: 40,
+          mass: 0.5,
+          duration: 1.5
+        } : {
+          duration: 0.2
+        }}
         onClick={hit ? undefined : onClick}
       >
         <svg
