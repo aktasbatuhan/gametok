@@ -159,206 +159,54 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
     if (!assetsLoaded) return
 
     const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d', { willReadFrequently: true })
+    const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
-    
-    // Force canvas pixel ratio for better mobile rendering
-    const fixPixelRatio = () => {
-      const dpr = window.devicePixelRatio || 1;
-      
-      // Set display size (css pixels)
-      const displayWidth = Math.floor(canvas.clientWidth * dpr);
-      const displayHeight = Math.floor(canvas.clientHeight * dpr);
-      
-      // Check if canvas is not the same size
-      if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
-        // Adjust canvas dimensions to match device display resolution
-        canvas.width = displayWidth;
-        canvas.height = displayHeight;
-        
-        // Scale all drawing operations
-        ctx.scale(dpr, dpr);
-        
-        // Reset properties after resize
-        ctx.imageSmoothingEnabled = true;
-        ctx.imageSmoothingQuality = 'high';
-      }
-    };
-    
-    // Set initial size
-    fixPixelRatio();
-    
-    // Resize listener
-    const handleResize = () => {
-      fixPixelRatio();
-      // Re-render immediately after resize
-      renderGame(); 
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    // Separate render function for better control
-    const renderGame = () => {
-      if (!canvas || !ctx) return;
-      
+
+    const gameLoop = setInterval(() => {
       // Clear canvas
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+
       // Draw background
       if (backgroundImage.current) {
-        ctx.drawImage(backgroundImage.current, 0, 0, canvas.width, canvas.height);
+        ctx.drawImage(backgroundImage.current, 0, 0, canvas.width, canvas.height)
       }
-      
+
       if (!gameStarted) {
-        // Draw message (but we're showing HTML overlay instead for better mobile interaction)
+        // Draw message
         if (messageImage.current) {
-          const messageWidth = canvas.width * 0.6;
-          const messageHeight = messageWidth * (267/184); // Maintain aspect ratio
-          const messageX = (canvas.width - messageWidth) / 2;
-          const messageY = (canvas.height - messageHeight) / 2;
-          ctx.drawImage(messageImage.current, messageX, messageY, messageWidth, messageHeight);
+          const messageWidth = 184
+          const messageHeight = 267
+          const messageX = (canvas.width - messageWidth) / 2
+          const messageY = (canvas.height - messageHeight) / 2
+          ctx.drawImage(messageImage.current, messageX, messageY, messageWidth, messageHeight)
         }
-        return;
+        return
       }
 
-      // Draw pipes
-      pipes.forEach(pipe => {
-        if (pipeImage.current) {
-          const pipeScale = canvas.width / 288; // Scale based on canvas width
-          const scaledPipeWidth = PIPE_WIDTH * pipeScale;
-          const scaledPipeHeight = 320 * pipeScale;
-          
-          // Draw top pipe (flipped vertically)
-          ctx.save();
-          ctx.scale(1, -1);
-          ctx.drawImage(
-            pipeImage.current, 
-            pipe.x * pipeScale, 
-            -pipe.topHeight * pipeScale, 
-            scaledPipeWidth, 
-            scaledPipeHeight
-          );
-          ctx.restore();
-
-          // Draw bottom pipe
-          ctx.drawImage(
-            pipeImage.current, 
-            pipe.x * pipeScale, 
-            (pipe.topHeight + PIPE_GAP) * pipeScale, 
-            scaledPipeWidth, 
-            scaledPipeHeight
-          );
-        }
-      });
-
-      // Draw bird
-      const birdScale = canvas.width / 288;
-      const scaledBirdWidth = BIRD_WIDTH * birdScale;
-      const scaledBirdHeight = BIRD_HEIGHT * birdScale;
-      
-      ctx.save();
-      ctx.translate(
-        50 * birdScale + scaledBirdWidth / 2, 
-        bird.y * birdScale + scaledBirdHeight / 2
-      );
-      ctx.rotate(Math.min(Math.PI / 4, Math.max(-Math.PI / 4, bird.velocity * 0.1)));
-      ctx.drawImage(
-        birdSprites.current[bird.frame],
-        -scaledBirdWidth / 2,
-        -scaledBirdHeight / 2,
-        scaledBirdWidth,
-        scaledBirdHeight
-      );
-      ctx.restore();
-
-      // Draw score
-      const scoreString = score.toString();
-      const digitWidth = 24 * (canvas.width / 288);
-      const totalWidth = scoreString.length * digitWidth;
-      const startX = (canvas.width - totalWidth) / 2;
-      scoreString.split('').forEach((digit, index) => {
-        const digitImage = numberSprites.current[parseInt(digit)];
-        if (digitImage) {
-          ctx.drawImage(
-            digitImage, 
-            startX + index * digitWidth, 
-            20 * (canvas.height / 512), 
-            digitWidth, 
-            36 * (canvas.width / 288)
-          );
-        }
-      });
-      
-      // Draw game over screen
-      if (gameOver && gameOverImage.current) {
-        const gameOverScale = canvas.width / 288;
-        const gameOverWidth = 192 * gameOverScale;
-        const gameOverHeight = 42 * gameOverScale;
-        const gameOverX = (canvas.width - gameOverWidth) / 2;
-        const gameOverY = (canvas.height - gameOverHeight) / 2;
-        
-        ctx.drawImage(
-          gameOverImage.current, 
-          gameOverX, 
-          gameOverY, 
-          gameOverWidth, 
-          gameOverHeight
-        );
-
-        // Draw Restart button
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(
-          canvas.width / 2 - 50 * gameOverScale, 
-          canvas.height / 2 + 50 * gameOverScale, 
-          100 * gameOverScale, 
-          40 * gameOverScale
-        );
-        ctx.fillStyle = 'white';
-        ctx.font = `${20 * gameOverScale}px Arial`;
-        ctx.fillText(
-          'Restart', 
-          canvas.width / 2 - 30 * gameOverScale, 
-          canvas.height / 2 + 75 * gameOverScale
-        );
-      }
-    };
-    
-    // Game update logic - separate from rendering
-    const gameLoop = setInterval(() => {
-      if (!gameStarted || gameOver) {
-        renderGame();
-        return;
-      }
-      
       // Update bird position and animation frame
       setBird(prevBird => ({
         y: prevBird.y + prevBird.velocity,
         velocity: prevBird.velocity + GRAVITY,
         frame: (prevBird.frame + 1) % 3
-      }));
+      }))
 
       // Move pipes
-      setPipes(prevPipes => prevPipes.map(pipe => ({ ...pipe, x: pipe.x - PIPE_SPEED })));
+      setPipes(prevPipes => prevPipes.map(pipe => ({ ...pipe, x: pipe.x - PIPE_SPEED })))
 
       // Generate new pipes
-      if (pipes.length === 0 || pipes[pipes.length - 1].x < 288 - 200) {
-        const topHeight = Math.random() * (512 - PIPE_GAP - 100) + 50;
-        setPipes(prevPipes => [...prevPipes, { x: 288, topHeight }]);
+      if (pipes.length === 0 || pipes[pipes.length - 1].x < canvas.width - 200) {
+        const topHeight = Math.random() * (canvas.height - PIPE_GAP - 100) + 50
+        setPipes(prevPipes => [...prevPipes, { x: canvas.width, topHeight }])
       }
 
       // Remove off-screen pipes
-      setPipes(prevPipes => prevPipes.filter(pipe => pipe.x + PIPE_WIDTH > 0));
+      setPipes(prevPipes => prevPipes.filter(pipe => pipe.x + PIPE_WIDTH > 0))
 
       // Check collisions
-      const birdRect = { x: 50, y: bird.y, width: BIRD_WIDTH, height: BIRD_HEIGHT };
+      const birdRect = { x: 50, y: bird.y, width: BIRD_WIDTH, height: BIRD_HEIGHT }
       for (const pipe of pipes) {
-        const topPipeRect = { x: pipe.x, y: 0, width: PIPE_WIDTH, height: pipe.topHeight };
-        const bottomPipeRect = { 
-          x: pipe.x, 
-          y: pipe.topHeight + PIPE_GAP, 
-          width: PIPE_WIDTH, 
-          height: 512 - pipe.topHeight - PIPE_GAP 
-        };
+        const topPipeRect = { x: pipe.x, y: 0, width: PIPE_WIDTH, height: pipe.topHeight }
+        const bottomPipeRect = { x: pipe.x, y: pipe.topHeight + PIPE_GAP, width: PIPE_WIDTH, height: canvas.height - pipe.topHeight - PIPE_GAP }
         
         if (
           birdRect.x < topPipeRect.x + topPipeRect.width &&
@@ -366,8 +214,8 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
           birdRect.y < topPipeRect.y + topPipeRect.height &&
           birdRect.y + birdRect.height > topPipeRect.y
         ) {
-          setGameOver(true);
-          playSound(hitSound.current);
+          setGameOver(true)
+          playSound(hitSound.current)
         }
 
         if (
@@ -376,102 +224,124 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
           birdRect.y < bottomPipeRect.y + bottomPipeRect.height &&
           birdRect.y + birdRect.height > bottomPipeRect.y
         ) {
-          setGameOver(true);
-          playSound(hitSound.current);
+          setGameOver(true)
+          playSound(hitSound.current)
         }
       }
 
       // Update score
       if (!gameOver && pipes.some(pipe => pipe.x + PIPE_WIDTH < 50 && pipe.x + PIPE_WIDTH >= 48)) {
-        setScore(prevScore => prevScore + 1);
-        playSound(pointSound.current);
+        setScore(prevScore => {
+          const newScore = prevScore + 1;
+          return newScore;
+        })
+        playSound(pointSound.current)
       }
 
-      // Check if bird hits boundaries
-      if (bird.y > 512 || bird.y < 0) {
-        setGameOver(true);
-        playSound(hitSound.current);
-      }
-      
-      // Render the updated game state
-      renderGame();
-      
-    }, 1000 / 60); // 60 FPS
+      // Draw pipes
+      pipes.forEach(pipe => {
+        if (pipeImage.current) {
+          // Draw top pipe (flipped vertically)
+          ctx.save()
+          ctx.scale(1, -1)
+          ctx.drawImage(pipeImage.current, pipe.x, -pipe.topHeight, PIPE_WIDTH, 320)
+          ctx.restore()
 
-    return () => {
-      clearInterval(gameLoop);
-      window.removeEventListener('resize', handleResize);
-    }
+          // Draw bottom pipe
+          ctx.drawImage(pipeImage.current, pipe.x, pipe.topHeight + PIPE_GAP, PIPE_WIDTH, 320)
+        }
+      })
+
+      // Draw bird
+      ctx.save()
+      ctx.translate(50 + BIRD_WIDTH / 2, bird.y + BIRD_HEIGHT / 2)
+      ctx.rotate(Math.min(Math.PI / 4, Math.max(-Math.PI / 4, bird.velocity * 0.1)))
+      ctx.drawImage(
+        birdSprites.current[bird.frame],
+        -BIRD_WIDTH / 2,
+        -BIRD_HEIGHT / 2,
+        BIRD_WIDTH,
+        BIRD_HEIGHT
+      )
+      ctx.restore()
+
+      // Draw score
+      const scoreString = score.toString()
+      const digitWidth = 24
+      const totalWidth = scoreString.length * digitWidth
+      const startX = (canvas.width - totalWidth) / 2
+      scoreString.split('').forEach((digit, index) => {
+        const digitImage = numberSprites.current[parseInt(digit)]
+        if (digitImage) {
+          ctx.drawImage(digitImage, startX + index * digitWidth, 20, digitWidth, 36)
+        }
+      })
+
+      if (bird.y > canvas.height || bird.y < 0) {
+        setGameOver(true)
+        playSound(hitSound.current)
+      }
+
+      if (gameOver) {
+        clearInterval(gameLoop)
+        if (gameOverImage.current) {
+          const gameOverWidth = 192
+          const gameOverHeight = 42
+          const gameOverX = (canvas.width - gameOverWidth) / 2
+          const gameOverY = (canvas.height - gameOverHeight) / 2
+          ctx.drawImage(gameOverImage.current, gameOverX, gameOverY, gameOverWidth, gameOverHeight)
+
+          // Draw Restart button
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+          ctx.fillRect(canvas.width / 2 - 50, canvas.height / 2 + 50, 100, 40)
+          ctx.fillStyle = 'white'
+          ctx.font = '20px Arial'
+          ctx.fillText('Restart', canvas.width / 2 - 30, canvas.height / 2 + 75)
+        }
+      }
+    }, 1000 / 60) // 60 FPS
+
+    return () => clearInterval(gameLoop)
   }, [bird, pipes, gameOver, score, jump, gameStarted, assetsLoaded, restartGame, playSound, onScoreUpdate])
 
-  const handleCanvasClick = useCallback((event: React.MouseEvent<HTMLCanvasElement>) => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-
-    const rect = canvas.getBoundingClientRect()
-    const x = event.clientX - rect.left
-    const y = event.clientY - rect.top
-
+  // Handle canvas interactions
+  const handleGameAction = useCallback(() => {
     if (gameOver) {
-      // Check if click is within Restart button area
-      if (
-        x >= canvas.width / 2 - 50 &&
-        x <= canvas.width / 2 + 50 &&
-        y >= canvas.height / 2 + 50 &&
-        y <= canvas.height / 2 + 90
-      ) {
-        restartGame()
-      }
+      restartGame();
     } else {
-      jump()
+      jump();
     }
-  }, [gameOver, jump, restartGame])
-  
-  const handleCanvasTouch = useCallback((event: React.TouchEvent<HTMLCanvasElement>) => {
-    // Prevent default behavior to avoid scrolling or zooming
-    event.preventDefault();
-    
-    // For touch events, we'll just trigger a jump or restart
-    if (gameOver) {
-      restartGame()
-    } else {
-      jump()
-    }
-    
-    // Log to console for debugging
-    console.log('Touch event detected on canvas');
-  }, [gameOver, jump, restartGame])
+  }, [gameOver, jump, restartGame]);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full w-full bg-black relative">
-      <div className="h-full w-full flex items-center justify-center relative">
+    <div className="flex flex-col items-center justify-center h-full w-full bg-black">
+      {/* Game Canvas */}
+      <div className="relative w-full h-full flex items-center justify-center">
         <canvas
           ref={canvasRef}
           width={288}
           height={512}
-          onClick={handleCanvasClick}
-          style={{ 
-            touchAction: 'none',
-            display: 'block',
-            maxWidth: '100%',
-            maxHeight: '100%',
-            width: 'auto',
-            height: '100%',
-            zIndex: 1
-          }}
+          className="h-full object-contain"
         />
         
-        {/* Mobile-friendly transparent touch area */}
+        {/* Overlay for mobile interaction */}
         <div 
           className="absolute inset-0 z-10"
-          onTouchStart={handleCanvasTouch}
-          onClick={handleCanvasClick}
+          onClick={handleGameAction}
           style={{ touchAction: 'none' }}
         >
           {!gameStarted && (
             <div className="absolute inset-0 flex items-center justify-center">
               <div className="bg-white/20 px-6 py-3 rounded-full text-white font-bold">
                 Tap to Start
+              </div>
+            </div>
+          )}
+          
+          {gameOver && (
+            <div className="absolute inset-0 flex items-center justify-center mt-32">
+              <div className="bg-white/20 px-6 py-3 rounded-full text-white font-bold">
+                Tap to Restart
               </div>
             </div>
           )}
