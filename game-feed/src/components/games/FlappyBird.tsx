@@ -326,6 +326,16 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
       jump()
     }
   }, [gameOver, jump, restartGame])
+  
+  const handleCanvasTouch = useCallback((event: React.TouchEvent<HTMLCanvasElement>) => {
+    // For touch events, we'll just trigger a jump or restart
+    // Without checking precise coordinates
+    if (gameOver) {
+      restartGame()
+    } else {
+      jump()
+    }
+  }, [gameOver, jump, restartGame])
 
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-black">
@@ -335,7 +345,7 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
         height={512}
         className="h-full w-full object-contain"
         onClick={handleCanvasClick}
-        onTouchStart={handleCanvasClick}
+        onTouchStart={handleCanvasTouch}
         style={{ touchAction: 'none' }}
       />
     </div>
