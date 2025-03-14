@@ -159,8 +159,19 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
     if (!assetsLoaded) return
 
     const canvas = canvasRef.current
-    const ctx = canvas?.getContext('2d')
-    if (!canvas || !ctx) return
+    if (!canvas) return
+    
+    // Make sure we're using a 2D context
+    const ctx = canvas.getContext('2d', { alpha: false })
+    if (!ctx) return
+    
+    // Force an initial render
+    ctx.fillStyle = 'black'
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    
+    if (backgroundImage.current) {
+      ctx.drawImage(backgroundImage.current, 0, 0, canvas.width, canvas.height)
+    }
 
     const gameLoop = setInterval(() => {
       // Clear canvas
@@ -168,17 +179,47 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
 
       // Draw background
       if (backgroundImage.current) {
-        ctx.drawImage(backgroundImage.current, 0, 0, canvas.width, canvas.height)
+        try {
+          ctx.drawImage(backgroundImage.current, 0, 0, canvas.width, canvas.height)
+        } catch (error) {
+          // If image drawing fails, at least draw a colored background
+          console.error("Failed to draw background:", error)
+          ctx.fillStyle = '#4EC0CA' // Sky blue background
+          ctx.fillRect(0, 0, canvas.width, canvas.height)
+        }
+      } else {
+        // Fallback if image isn't loaded
+        ctx.fillStyle = '#4EC0CA' // Sky blue background
+        ctx.fillRect(0, 0, canvas.width, canvas.height)
       }
 
       if (!gameStarted) {
         // Draw message
         if (messageImage.current) {
-          const messageWidth = 184
-          const messageHeight = 267
-          const messageX = (canvas.width - messageWidth) / 2
-          const messageY = (canvas.height - messageHeight) / 2
-          ctx.drawImage(messageImage.current, messageX, messageY, messageWidth, messageHeight)
+          try {
+            const messageWidth = 184
+            const messageHeight = 267
+            const messageX = (canvas.width - messageWidth) / 2
+            const messageY = (canvas.height - messageHeight) / 2
+            ctx.drawImage(messageImage.current, messageX, messageY, messageWidth, messageHeight)
+          } catch (error) {
+            console.error("Failed to draw message:", error)
+            // Draw a simple message as fallback
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+            ctx.fillRect(canvas.width / 2 - 100, canvas.height / 2 - 30, 200, 60)
+            ctx.fillStyle = 'white'
+            ctx.font = '20px Arial'
+            ctx.textAlign = 'center'
+            ctx.fillText('Get Ready!', canvas.width / 2, canvas.height / 2 + 5)
+          }
+        } else {
+          // Fallback if image isn't loaded
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.5)'
+          ctx.fillRect(canvas.width / 2 - 100, canvas.height / 2 - 30, 200, 60)
+          ctx.fillStyle = 'white'
+          ctx.font = '20px Arial'
+          ctx.textAlign = 'center'
+          ctx.fillText('Get Ready!', canvas.width / 2, canvas.height / 2 + 5)
         }
         return
       }
@@ -316,12 +357,19 @@ export default function FlappyBird({ onScoreUpdate }: FlappyBirdProps) {
   return (
     <div className="flex flex-col items-center justify-center h-full w-full bg-black">
       {/* Game Canvas */}
-      <div className="relative w-full h-full flex items-center justify-center">
+      <div className="relative w-full h-full flex items-center justify-center overflow-hidden">
         <canvas
           ref={canvasRef}
           width={288}
           height={512}
-          className="h-full object-contain"
+          style={{
+            maxHeight: '100%',
+            maxWidth: '100%',
+            height: 'auto',
+            width: 'auto',
+            objectFit: 'contain',
+            display: 'block'
+          }}
         />
         
         {/* Overlay for mobile interaction */}
