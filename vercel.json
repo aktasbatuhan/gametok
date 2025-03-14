@@ -1,16 +1,5 @@
 {
-  "version": 2,
-  "outputDirectory": "game-feed/.next",
-  "builds": [
-    {
-      "src": "game-feed/package.json",
-      "use": "@vercel/next"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "game-feed/$1"
-    }
+  "rewrites": [
+    { "source": "/(.*)", "destination": "/game-feed/$1" }
   ]
 } 
