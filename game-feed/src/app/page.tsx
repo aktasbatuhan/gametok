@@ -12,9 +12,10 @@ import Tetris from "@/components/games/Tetris";
 import TicTacToe from "@/components/games/TicTacToe";
 import SnowBored from "@/components/games/SnowBored";
 import BrazilianSoccer from "@/components/games/BrazilianSoccer";
+import DuckGame from "@/components/games/DuckGame";
 import GameSubmissionModal from "@/components/GameSubmissionModal";
 
-const BUILT_IN_GAMES = [
+const ALL_GAMES = [
   {
     id: "flappy-bird",
     title: "Flappy Bird",
@@ -54,6 +55,14 @@ const BUILT_IN_GAMES = [
     description: "Snowboard down the slopes, avoiding obstacles!",
     thumbnail: null,
     creatorUrl: "https://v0.dev/chat/community/we-re-snow-back-P3zKfFoshCq"
+  },
+  {
+    id: "duck-game",
+    title: "Duck Arcade",
+    component: DuckGame,
+    description: "Shoot ducks for points in this arcade shooter! Can you beat the high score?",
+    thumbnail: null,
+    creatorUrl: "https://v0.dev/chat/community/duck-hunter"
   }
 ];
 
@@ -69,7 +78,19 @@ type GameType = {
   sourceUrl?: string;
 };
 
+// Shuffle array function
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 export default function Home() {
+  // Shuffle games on initial load
+  const [games, setGames] = useState(() => shuffleArray(ALL_GAMES));
   const [activeGameIndex, setActiveGameIndex] = useState(0);
   const gameRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [isScrolling, setIsScrolling] = useState(false);
@@ -116,7 +137,7 @@ export default function Home() {
 
   // This handles the sharing functionality
   const shareToTwitter = (gameId: string, score: number) => {
-    const game = BUILT_IN_GAMES.find((g) => g.id === gameId);
+    const game = games.find((g) => g.id === gameId);
     if (!game) return;
     
     const text = `I just scored ${score} in ${game.title} on GameTok! Can you beat my score? #GameTok`;
@@ -142,7 +163,7 @@ export default function Home() {
       <header className="fixed top-0 w-full bg-black z-50 flex justify-between items-center px-4 py-3">
         <h1 className="text-2xl font-bold text-white">GameTok</h1>
         <nav className="flex gap-4 overflow-x-auto max-w-[80%] pb-2">
-          {BUILT_IN_GAMES.map((game, index) => (
+          {games.map((game, index) => (
             <button
               key={game.id}
               className={`text-sm whitespace-nowrap ${
@@ -160,7 +181,7 @@ export default function Home() {
 
       {/* Main feed */}
       <div className="w-full mt-16 pb-20 overflow-hidden">
-        {BUILT_IN_GAMES.map((game, index) => (
+        {games.map((game, index) => (
           <GameFeedItem
             key={game.id}
             game={game}
@@ -181,7 +202,7 @@ export default function Home() {
       
       {/* Navigation dots */}
       <div className="fixed right-4 top-1/2 transform -translate-y-1/2 flex flex-col gap-3 z-40">
-        {BUILT_IN_GAMES.map((game, index) => (
+        {games.map((game, index) => (
           <button
             key={game.id}
             className={`w-3 h-3 rounded-full transition-all duration-300 ${
