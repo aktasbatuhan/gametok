@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Plus } from "lucide-react";
 import Image from "next/image";
 
-import FlappyBird from "@/components/games/FlappyBird";
 import MemoryGame from "@/components/games/MemoryGame";
 import Tetris from "@/components/games/Tetris";
 import TicTacToe from "@/components/games/TicTacToe";
@@ -16,14 +15,6 @@ import DuckGame from "@/components/games/DuckGame";
 import GameSubmissionModal from "@/components/GameSubmissionModal";
 
 const ALL_GAMES = [
-  {
-    id: "flappy-bird",
-    title: "Flappy Bird",
-    component: FlappyBird,
-    description: "Tap to fly through pipes. How far can you go?",
-    thumbnail: null, // We're showing the game directly, no need for thumbnails
-    creatorUrl: "https://v0.dev/chat/community/flappy-bird-H6d9DNE50jO"
-  },
   {
     id: "memory-game",
     title: "Memory Game",
@@ -62,7 +53,7 @@ const ALL_GAMES = [
     component: DuckGame,
     description: "Shoot ducks for points in this arcade shooter! Can you beat the high score?",
     thumbnail: null,
-    creatorUrl: "https://v0.dev/chat/community/duck-hunter"
+    creatorUrl: "https://v0.dev/chat/community/duck-arcade-u5A5L1sZjbP"
   }
 ];
 

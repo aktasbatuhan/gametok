@@ -29,6 +29,7 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
   const [accuracy, setAccuracy] = useState(100)
   const audioContext = useRef<AudioContext | null>(null)
   const [isMobile, setIsMobile] = useState(false)
+  const [shootEffect, setShootEffect] = useState<{x: number, y: number} | null>(null)
 
   // Initialize high score from localStorage and check if mobile
   useEffect(() => {
@@ -200,6 +201,11 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
 
     setShotsFired((prev) => prev + 1)
     playSound("shoot")
+    
+    // Show shoot effect on mobile
+    if (isMobile) {
+      setShootEffect({ x, y })
+    }
 
     // Check if shot hit any ducks
     if (gameAreaRef.current) {
@@ -215,8 +221,8 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
           // Skip already hit ducks
           if (duck.hit) return duck
 
-          // Check if shot coordinates are within duck hitbox (larger than the duck for easier gameplay)
-          const hitboxSize = 50
+          // Check if shot coordinates are within duck hitbox (larger for mobile for easier gameplay)
+          const hitboxSize = isMobile ? 70 : 50
           const hitboxX = duck.x - hitboxSize / 2
           const hitboxY = duck.y - hitboxSize / 2
 
@@ -265,41 +271,94 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
     }
   }, [ducks])
 
-  // Handle click on game area (for desktop shooting)
+  // Handle click on game area (for both desktop and mobile shooting)
   const handleGameAreaClick = (e: React.MouseEvent) => {
-    if (!gameActive || isMobile) return
-    handleShoot(e.clientX, e.clientY)
+    if (!gameActive) return
+    
+    // Get the coordinates
+    const x = e.clientX
+    const y = e.clientY
+    
+    // If on mobile, we'll handle tapping on the game area to shoot
+    // If on desktop, we'll use the cursor to shoot
+    handleShoot(x, y)
   }
 
-  // Custom cursor component (only for desktop)
+  // Shooting effect component for visual feedback on mobile
+  const ShootEffect = ({ position, onComplete }: { position: { x: number, y: number } | null, onComplete: () => void }) => {
+    if (!position) return null;
+    
+    return (
+      <motion.div
+        className="absolute z-10 pointer-events-none"
+        style={{
+          left: position.x,
+          top: position.y,
+          transform: "translate(-50%, -50%)",
+        }}
+        initial={{ opacity: 1, scale: 0 }}
+        animate={{ opacity: 0, scale: 2 }}
+        transition={{ duration: 0.3 }}
+        onAnimationComplete={onComplete}
+      >
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="20" fill="yellow" fillOpacity="0.5" />
+          <circle cx="20" cy="20" r="10" fill="orange" fillOpacity="0.7" />
+        </svg>
+      </motion.div>
+    );
+  };
+
+  // Custom cursor component for desktop
   const Cursor = () => {
-    const [position, setPosition] = useState({ x: 0, y: 0 })
-    const [isShooting, setIsShooting] = useState(false)
+    const cursorRef = useRef<HTMLDivElement>(null);
+    const [isShooting, setIsShooting] = useState(false);
     
     useEffect(() => {
-      if (!gameActive || isMobile) return
+      if (!gameActive || isMobile) return;
       
+      // More efficient mouse move handling
       const handleMouseMove = (e: MouseEvent) => {
-        setPosition({ x: e.clientX, y: e.clientY })
-      }
+        if (cursorRef.current) {
+          // Use transform for better performance
+          cursorRef.current.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+        }
+      };
       
-      window.addEventListener("mousemove", handleMouseMove)
-      return () => window.removeEventListener("mousemove", handleMouseMove)
-    }, [])
+      // Listen for clicks to animate shooting
+      const handleClick = () => {
+        if (gameActive) {
+          setIsShooting(true);
+          setTimeout(() => setIsShooting(false), 150);
+        }
+      };
+      
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('click', handleClick);
+      
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('click', handleClick);
+      };
+    }, [gameActive, isMobile]);
     
     // Don't show cursor on mobile
-    if (isMobile || !gameActive) return null
+    if (isMobile || !gameActive) return null;
     
     return (
       <div
-        className="fixed z-50 pointer-events-none"
-        style={{
-          left: `${position.x}px`,
-          top: `${position.y}px`,
-          transform: "translate(-50%, -50%)",
+        ref={cursorRef}
+        className="fixed top-0 left-0 z-50 pointer-events-none"
+        style={{ 
+          transform: 'translate(-50%, -50%)', 
+          transition: 'transform 0.01s linear',
+          willChange: 'transform',
         }}
       >
-        <motion.div animate={isShooting ? { scale: 1.2 } : { scale: 1 }} transition={{ duration: 0.15 }}>
+        <motion.div 
+          animate={isShooting ? { scale: 1.2 } : { scale: 1 }} 
+          transition={{ duration: 0.15 }}
+        >
           <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="20" cy="20" r="18" stroke="#000" strokeWidth="1.5" strokeOpacity="0.5" fill="none" />
             <circle cx="20" cy="20" r="3" fill="#ff0000" fillOpacity="0.7" />
@@ -310,8 +369,8 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
           </svg>
         </motion.div>
       </div>
-    )
-  }
+    );
+  };
 
   // Duck component
   const Duck = ({ position, direction, hit, onClick }: { 
@@ -385,6 +444,17 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
           className="relative flex-grow bg-gradient-to-b from-sky-100 to-blue-200 overflow-hidden"
           onClick={handleGameAreaClick}
           style={{ cursor: !isMobile && gameActive ? 'none' : 'default' }}
+          onTouchStart={(e) => {
+            // Prevent default to avoid unwanted mobile behaviors
+            e.preventDefault();
+            if (!gameActive) return;
+            
+            // Get touch coordinates
+            const touch = e.touches[0];
+            if (touch) {
+              handleShoot(touch.clientX, touch.clientY);
+            }
+          }}
         >
           {/* Start/game over overlay */}
           {!gameActive && (
@@ -401,6 +471,12 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
             </div>
           )}
 
+          {/* Shooting effect for mobile */}
+          <ShootEffect 
+            position={shootEffect} 
+            onComplete={() => setShootEffect(null)} 
+          />
+
           {/* Render ducks */}
           {ducks.map((duck) => (
             <Duck
@@ -416,7 +492,7 @@ export default function DuckGame({ onScoreUpdate }: DuckGameProps) {
         {/* Game footer */}
         <div className="p-2 bg-blue-50 border-t">
           <p className="text-center text-sm text-muted-foreground">
-            {isMobile ? "Tap on ducks to shoot!" : "Click to shoot ducks!"}
+            {isMobile ? "Tap anywhere on the screen to shoot ducks!" : "Click anywhere to shoot ducks!"}
           </p>
         </div>
       </div>
