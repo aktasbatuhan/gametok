@@ -5,10 +5,10 @@ import clientPromise from '@/lib/mongodb';
 // GET /api/submissions/[id] - Get a specific submission
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
+    const id = context.params.id;
     
     // Validate ObjectId
     if (!ObjectId.isValid(id)) {
@@ -19,7 +19,7 @@ export async function GET(
     }
     
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db('gametok-demo'); // Specify the database name
     
     const submission = await db.collection('submissions').findOne({
       _id: new ObjectId(id)
@@ -45,10 +45,10 @@ export async function GET(
 // PATCH /api/submissions/[id] - Update a submission (e.g., change status)
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
   try {
-    const id = params.id;
+    const id = context.params.id;
     const body = await request.json();
     
     // Validate ObjectId
@@ -60,7 +60,7 @@ export async function PATCH(
     }
     
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db('gametok-demo'); // Specify the database name
     
     // Only allow updating specific fields
     const allowedUpdates = ['status'];

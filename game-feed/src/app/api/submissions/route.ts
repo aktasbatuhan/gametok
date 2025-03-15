@@ -19,7 +19,7 @@ export async function POST(request: NextRequest) {
     
     // Connect to MongoDB
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db('gametok-demo'); // Specify the database name
     const submissionsCollection = db.collection('submissions');
     
     // Create submission with pending status
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   try {
     const client = await clientPromise;
-    const db = client.db();
+    const db = client.db('gametok-demo'); // Specify the database name
     const submissions = await db.collection('submissions').find({}).toArray();
     
     return NextResponse.json({ submissions });
