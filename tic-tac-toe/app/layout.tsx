@@ -16,6 +16,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <script defer data-domain="gametok.vercel.app" src="https://plausible.io/js/script.js"></script>
       </head>
       <body>{children}</body>
     </html>
