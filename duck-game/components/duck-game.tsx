@@ -249,10 +249,18 @@ export default function DuckGame() {
     setShotsFired((prev) => prev + 1)
     playSound("shoot")
 
-    setDucks((prevDucks) => prevDucks.map((duck) => (duck.id === id ? { ...duck, hit: true } : duck)))
-
-    setScore((prevScore) => prevScore + 1)
-    setTimeout(() => playSound("hit"), 100)
+    // Check if the duck is already hit
+    const duck = ducks.find(d => d.id === id);
+    if (duck && !duck.hit) {
+      // Mark the duck as hit
+      setDucks((prevDucks) => prevDucks.map((duck) => (duck.id === id ? { ...duck, hit: true } : duck)))
+      
+      // Increment score
+      setScore((prevScore) => prevScore + 1)
+      
+      // Play hit sound
+      setTimeout(() => playSound("hit"), 100)
+    }
   }
 
   // Remove hit ducks after animation

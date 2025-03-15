@@ -1,5 +1,6 @@
 "use client"
 
+import React from "react"
 import { motion } from "framer-motion"
 
 interface DuckProps {
@@ -13,6 +14,14 @@ interface DuckProps {
 }
 
 export default function Duck({ position, direction, hit, onClick }: DuckProps) {
+  // Handle click event, preventing multiple clicks on the same duck
+  const handleClick = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    if (!hit) {
+      onClick()
+    }
+  }
+
   return (
     <motion.div
       className="absolute cursor-pointer select-none"
@@ -20,6 +29,10 @@ export default function Duck({ position, direction, hit, onClick }: DuckProps) {
         left: position.x,
         top: position.y,
         transform: direction === "left" ? "scaleX(-1)" : "none",
+        // Add a larger touch target for mobile
+        touchAction: "manipulation",
+        padding: "10px",
+        margin: "-10px",
       }}
       animate={
         hit
@@ -31,7 +44,7 @@ export default function Duck({ position, direction, hit, onClick }: DuckProps) {
           : {}
       }
       transition={{ duration: 0.5 }}
-      onClick={hit ? undefined : onClick}
+      onClick={handleClick}
     >
       <svg
         width="50"

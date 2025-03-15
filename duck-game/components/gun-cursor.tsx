@@ -1,7 +1,6 @@
 "use client"
 
-import type React from "react"
-
+import React from "react"
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 
@@ -22,7 +21,7 @@ export default function GunCursor({ gameActive, onShoot }: GunCursorProps) {
 
   // Track mouse position
   useEffect(() => {
-    if (!gameActive || isMobile) return
+    if (!gameActive) return
 
     const handleMouseMove = (e: MouseEvent) => {
       setPosition({ x: e.clientX, y: e.clientY })
@@ -30,23 +29,48 @@ export default function GunCursor({ gameActive, onShoot }: GunCursorProps) {
 
     window.addEventListener("mousemove", handleMouseMove)
     return () => window.removeEventListener("mousemove", handleMouseMove)
-  }, [gameActive, isMobile])
+  }, [gameActive])
 
   // Handle shooting animation
-  const handleShoot = (e: React.MouseEvent) => {
+  const handleShoot = (e: React.MouseEvent | React.TouchEvent) => {
     if (!gameActive) return
 
     setIsShooting(true)
-    onShoot(e.clientX, e.clientY)
+    
+    // Get coordinates based on event type
+    let x, y;
+    if ('touches' in e) {
+      // Touch event
+      x = e.touches[0].clientX;
+      y = e.touches[0].clientY;
+    } else {
+      // Mouse event
+      x = e.clientX;
+      y = e.clientY;
+    }
+    
+    onShoot(x, y)
 
     setTimeout(() => {
       setIsShooting(false)
     }, 150)
   }
 
-  // Don't show cursor on mobile devices
-  if (isMobile || !gameActive) return null
+  // For mobile, we'll use a different approach - no visible cursor
+  if (!gameActive) return null
 
+  // On mobile, just return the invisible overlay to capture taps
+  if (isMobile) {
+    return (
+      <div 
+        className="fixed inset-0 z-40" 
+        onClick={handleShoot as any}
+        onTouchStart={handleShoot as any}
+      />
+    )
+  }
+
+  // Desktop version with visible cursor
   return (
     <>
       {/* Custom cursor that follows mouse */}
