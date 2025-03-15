@@ -12,7 +12,6 @@ GameTok is a web application that allows users to scroll through a feed of inter
   - Tic-Tac-Toe: Challenge an AI opponent powered by OpenAI
   - Snow-Bored: Snowboard down slopes avoiding obstacles
 - Game submission system with MongoDB backend
-- Admin dashboard for reviewing submissions
 - Score tracking for each game
 - X (Twitter) sharing functionality
 - Mobile-friendly with touch controls
