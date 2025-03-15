@@ -15,7 +15,7 @@ interface DuckProps {
 
 export default function Duck({ position, direction, hit, onClick }: DuckProps) {
   // Handle click event, preventing multiple clicks on the same duck
-  const handleClick = (e: React.MouseEvent) => {
+  const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     e.stopPropagation()
     if (!hit) {
       onClick()
@@ -31,8 +31,9 @@ export default function Duck({ position, direction, hit, onClick }: DuckProps) {
         transform: direction === "left" ? "scaleX(-1)" : "none",
         // Add a larger touch target for mobile
         touchAction: "manipulation",
-        padding: "10px",
-        margin: "-10px",
+        padding: "15px",
+        margin: "-15px",
+        zIndex: 20
       }}
       animate={
         hit
@@ -45,6 +46,7 @@ export default function Duck({ position, direction, hit, onClick }: DuckProps) {
       }
       transition={{ duration: 0.5 }}
       onClick={handleClick}
+      onTouchStart={handleClick as any}
     >
       <svg
         width="50"

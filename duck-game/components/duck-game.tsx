@@ -209,17 +209,17 @@ export default function DuckGame() {
       const relativeY = y - gameRect.top
 
       // Check each duck to see if it was hit
-      let hitADuck = false
+      let hitDuckId = null;
 
-      setDucks((prevDucks) =>
-        prevDucks.map((duck) => {
+      setDucks((prevDucks) => {
+        const newDucks = prevDucks.map((duck) => {
           // Skip already hit ducks
-          if (duck.hit) return duck
+          if (duck.hit) return duck;
 
           // Check if shot coordinates are within duck hitbox (larger than the duck for easier gameplay)
-          const hitboxSize = 50
-          const hitboxX = duck.x - hitboxSize / 2
-          const hitboxY = duck.y - hitboxSize / 2
+          const hitboxSize = 60; // Increased hitbox size
+          const hitboxX = duck.x - hitboxSize / 2;
+          const hitboxY = duck.y - hitboxSize / 2;
 
           if (
             relativeX >= hitboxX &&
@@ -227,18 +227,27 @@ export default function DuckGame() {
             relativeY >= hitboxY &&
             relativeY <= hitboxY + hitboxSize
           ) {
-            hitADuck = true
-            setTimeout(() => playSound("hit"), 100)
-            return { ...duck, hit: true }
+            hitDuckId = duck.id;
+            setTimeout(() => playSound("hit"), 100);
+            return { ...duck, hit: true };
           }
 
-          return duck
-        }),
-      )
+          return duck;
+        });
+        
+        return newDucks;
+      });
 
-      if (hitADuck) {
-        setScore((prevScore) => prevScore + 1)
-      }
+      // Update score in a separate effect to ensure it happens after state update
+      setTimeout(() => {
+        if (hitDuckId !== null) {
+          setScore((prevScore) => {
+            const newScore = prevScore + 1;
+            console.log("Duck shot! New score:", newScore);
+            return newScore;
+          });
+        }
+      }, 0);
     }
   }
 
@@ -253,13 +262,17 @@ export default function DuckGame() {
     const duck = ducks.find(d => d.id === id);
     if (duck && !duck.hit) {
       // Mark the duck as hit
-      setDucks((prevDucks) => prevDucks.map((duck) => (duck.id === id ? { ...duck, hit: true } : duck)))
+      setDucks((prevDucks) => 
+        prevDucks.map((d) => (d.id === id ? { ...d, hit: true } : d))
+      )
       
       // Increment score
       setScore((prevScore) => prevScore + 1)
       
       // Play hit sound
       setTimeout(() => playSound("hit"), 100)
+      
+      console.log("Duck hit! New score:", score + 1) // Debug logging
     }
   }
 
