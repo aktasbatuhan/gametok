@@ -2,13 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ObjectId } from 'mongodb';
 import clientPromise from '@/lib/mongodb';
 
+interface RouteContext {
+  params: {
+    id: string;
+  };
+}
+
 // GET /api/submissions/[id] - Get a specific submission
 export async function GET(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: RouteContext
 ) {
   try {
-    const id = context.params.id;
+    const id = params.id;
     
     // Validate ObjectId
     if (!ObjectId.isValid(id)) {
@@ -45,10 +51,10 @@ export async function GET(
 // PATCH /api/submissions/[id] - Update a submission (e.g., change status)
 export async function PATCH(
   request: NextRequest,
-  context: { params: { id: string } }
+  { params }: RouteContext
 ) {
   try {
-    const id = context.params.id;
+    const id = params.id;
     const body = await request.json();
     
     // Validate ObjectId
